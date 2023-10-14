@@ -15,7 +15,8 @@ export default class TodoCapture extends Plugin {
 		const keyword = this.settings.keyword || 'TODO';
 
 		// Here, we account for bulleted lines and lines with checkboxes
-		const patternToMatch = new RegExp('^-?\\s*(\\[x?\\])?\\s+' + keyword);
+		const patternToMatch = new RegExp('^-?\\s*(\\[x?\\])?\\s*' + keyword);
+		const todoHeading = `## ${keyword}s`;
 
 		if (!editor) {
 			console.error('Editor is not defined');
@@ -27,19 +28,35 @@ export default class TodoCapture extends Plugin {
 
 		let todos: string[] = [];
 		let modifiedContent: string[] = [];
+		let inTodoSection = false;
+		let hasTodoSection = false;
 
 		lines.forEach(line => {
 
 			if (patternToMatch.test(line)) {
 				todos.push(line);
+			} else if (line.trim() === todoHeading.trim()){
+				inTodoSection = true;
+				hasTodoSection = true;
+				modifiedContent.push(line);
 			} else {
+
+				if (inTodoSection && line.trim() === "") {
+
+				} else if (inTodoSection) {
+					inTodoSection = false;
+				}
+
 				modifiedContent.push(line);
 			}
-
 		});
 
 		if (todos.length > 0) {
-			modifiedContent.push(`\n## ${keyword}s \n`, ...todos);
+			if (!hasTodoSection) {
+				modifiedContent.push(todoHeading);
+			}
+
+			modifiedContent.push(...todos);
 			editor.setValue(modifiedContent.join('\n'));
 		}
 	}
@@ -79,9 +96,6 @@ export default class TodoCapture extends Plugin {
 	}
 }
 
-
-// Consider TODO types here that the user can set. For instance TODO or whatever else they can want to wrangle and move to
-// a different heading.
 class TodoCaptureSettingTab extends PluginSettingTab {
 	plugin: TodoCapture;
 
