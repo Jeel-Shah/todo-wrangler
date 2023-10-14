@@ -64,13 +64,6 @@ export default class TodoCapture extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-		// This creates an icon in the left ribbon.
-		const ribbonIconEl = this.addRibbonIcon('dice', 'Todo Wrangler', (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			this.extractTodosFromCurrentNote();
-		});
-
-
 		// This adds an editor command that can perform some operation on the current editor instance
 		this.addCommand({
 			id: 'todo-wrangler',
