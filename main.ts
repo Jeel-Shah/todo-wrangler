@@ -1,17 +1,48 @@
 import { App, Editor, MarkdownView, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
 
-// Remember to rename these classes and interfaces!
-
 interface TodoCaptureSettings {
-	mySetting: string;
+	keyword: string;
 }
 
 const DEFAULT_SETTINGS: TodoCaptureSettings = {
-	mySetting: 'default'
+	keyword: 'TODO'
 }
 
 export default class TodoCapture extends Plugin {
 	settings: TodoCaptureSettings;
+
+	async extractTodosFromCurrentNote(editor: Editor, view: MarkdownView): Promise<void> {
+		const keyword = this.settings.keyword || 'TODO';
+
+		// Here, we account for bulleted lines and lines with checkboxes
+		const patternToMatch = new RegExp('^-?\\s*(\\[x?\\])?\\s+' + keyword);
+
+		if (!editor) {
+			console.error('Editor is not defined');
+			return;
+		}
+
+		const content = editor.getValue();
+		const lines = content.split('\n');
+
+		let todos: string[] = [];
+		let modifiedContent: string[] = [];
+
+		lines.forEach(line => {
+
+			if (patternToMatch.test(line)) {
+				todos.push(line);
+			} else {
+				modifiedContent.push(line);
+			}
+
+		});
+
+		if (todos.length > 0) {
+			modifiedContent.push(`\n## ${keyword}s \n`, ...todos);
+			editor.setValue(modifiedContent.join('\n'));
+		}
+	}
 
 	async onload() {
 		await this.loadSettings();
@@ -19,19 +50,19 @@ export default class TodoCapture extends Plugin {
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon('dice', 'Todo Wrangler', (evt: MouseEvent) => {
 			// Called when the user clicks the icon.
-			new Notice('Capture your Todos with ease');
+			this.extractTodosFromCurrentNote();
 		});
 
 
 		// This adds an editor command that can perform some operation on the current editor instance
 		this.addCommand({
-			id: 'sample-editor-command',
-			name: 'Sample editor command',
+			id: 'todo-wrangler',
+			name: 'Wrangle Todos',
 			editorCallback: (editor: Editor, view: MarkdownView) => {
-				console.log(editor.getSelection());
-				editor.replaceSelection('Sample Editor Command');
+				this.extractTodosFromCurrentNote(editor, view);
 			}
 		});
+
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new TodoCaptureSettingTab(this.app, this));
@@ -52,9 +83,9 @@ export default class TodoCapture extends Plugin {
 // Consider TODO types here that the user can set. For instance TODO or whatever else they can want to wrangle and move to
 // a different heading.
 class TodoCaptureSettingTab extends PluginSettingTab {
-	plugin: MyPlugin;
+	plugin: TodoCapture;
 
-	constructor(app: App, plugin: MyPlugin) {
+	constructor(app: App, plugin: TodoCapture) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
@@ -63,16 +94,57 @@ class TodoCaptureSettingTab extends PluginSettingTab {
 		const {containerEl} = this;
 
 		containerEl.empty();
+		containerEl.createEl('h2', {text: 'Settings for TODO Wrangler'});
 
 		new Setting(containerEl)
-			.setName('Setting #1')
-			.setDesc('It\'s a secret')
+			.setName('Keyword')
+			.setDesc('Specify the keyword you want to extract (e.g., TODO, DONE, etc.)')
 			.addText(text => text
 				.setPlaceholder('Enter your secret')
-				.setValue(this.plugin.settings.mySetting)
+				.setValue(this.plugin.settings.keyword)
 				.onChange(async (value) => {
-					this.plugin.settings.mySetting = value;
+					this.plugin.settings.keyword = value;
 					await this.plugin.saveSettings();
 				}));
 	}
 }
+
+		// const keyword = this.settings.keyword || 'TODO';
+
+		// // Here, we account for bulleted lines and lines with checkboxes
+		// const patternToMatch = '/^-?\s*(\[x?\])?\s+\w+/' + keyword
+
+		// const activeLeaf = app.workspace.activeLeaf;
+
+		// if (!activeLeaf) {
+		// 	return;
+		// }
+
+		// const view = activeLeaf.view;
+		// const isMarkdownView = view.getViewType() === 'markdown';
+
+		// if (!isMarkdownView) {
+		// 	return;
+		// }
+
+		// const editor = view.editor;
+		// const content = editor.getValue();
+		// const lines = content.split('\n');
+
+		// let todos: string[] = [];
+		// let modifiedContent: string[] = [];
+
+		// lines.forEach(line => {
+
+		// 	if (patternToMatch.test(line)) {
+		// 		todos.push(line);
+		// 	} else {
+		// 		modifiedContent.push(line);
+		// 	}
+
+		// });
+
+		// if (todos.length > 0) {
+		// 	modifiedContent.push('\n ## ${keyword}s\n', ...todos);
+		// 	editor.setValue(modifiedContent.join('\n'));
+		// }
