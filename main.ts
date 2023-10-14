@@ -1,4 +1,4 @@
-import { App, Editor, MarkdownView, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
+import { App, Editor, MarkdownView, Plugin, PluginSettingTab, Setting } from 'obsidian';
 
 interface TodoCaptureSettings {
 	keyword: string;
@@ -101,13 +101,12 @@ class TodoCaptureSettingTab extends PluginSettingTab {
 		const {containerEl} = this;
 
 		containerEl.empty();
-		containerEl.createEl('h2', {text: 'Settings for TODO Wrangler'});
 
 		new Setting(containerEl)
 			.setName('Keyword')
 			.setDesc('Specify the keyword you want to extract (e.g., TODO, DONE, etc.)')
 			.addText(text => text
-				.setPlaceholder('Enter your secret')
+				.setPlaceholder('Enter a keyword to wrangle')
 				.setValue(this.plugin.settings.keyword)
 				.onChange(async (value) => {
 					this.plugin.settings.keyword = value;
