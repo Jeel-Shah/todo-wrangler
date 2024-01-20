@@ -15,7 +15,7 @@ export default class TodoCapture extends Plugin {
 		const keyword = this.settings.keyword || 'TODO';
 
 		// Here, we account for bulleted lines and lines with checkboxes
-		const patternToMatch = new RegExp('^-?\\s*(\\[x?\\])?\\s*' + keyword);
+		const patternToMatch = new RegExp('^-?\\s*(\\[\\s*|x?\\])?\\s*' + keyword);
 		const todoHeading = `## ${keyword}s`;
 
 		if (!editor) {
