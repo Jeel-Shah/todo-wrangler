@@ -21,7 +21,8 @@ An Obsidian plugin that wrangles all lines starting with "TODO" in your notes an
 
 ### From Within Obsidian
 
-Coming soon! We're working on submitting the plugin to the community plugins in Obsidian. Once approved, you'll be able to install directly from within Obsidian by going to Settings > Community plugins and searching for "TODO Wrangler".
+The plugin is available in the Obsidian plugin library ([TODO Wrangler](https://obsidian.md/plugins?search=TODO%20Wrangler)). You can install
+the plugin directly from within Obsidian by going to be Settings > Community plugins and searching for "TODO Wrangler".
 
 ## Usage
 
